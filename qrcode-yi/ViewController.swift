@@ -11,11 +11,11 @@ import NetworkExtension
 
 class ViewController: UIViewController, UITextFieldDelegate {
 
+    @IBOutlet weak var wifiSourceControl: UISegmentedControl!
     @IBOutlet weak var imageQr: UIImageView!
     @IBOutlet weak var ssidTF: UITextField!
     @IBOutlet weak var psswdTF: UITextField!
     @IBOutlet weak var streamNameTF: UITextField!
-    @IBOutlet weak var qrButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,18 +24,22 @@ class ViewController: UIViewController, UITextFieldDelegate {
         psswdTF.delegate = self
         streamNameTF.delegate = self
         
-        ssidTF.text = UIDevice.current.name
-        
-        qrButton.isEnabled = false
         [ssidTF, psswdTF, streamNameTF].forEach({ $0.addTarget(self, action: #selector(editingChanged), for: .editingChanged) })
         
-//        initHotspot()
+        WifiSourceUpdate(wifiSourceControl)
+        
+    }
+    
+    // Make sure this is in the header of the objc .h file
+    func updateStreamName(streamName: String) {
+        streamNameTF.text = streamName
+        editingChanged(streamNameTF)
     }
     
     private func showQRCode(from ssid: String, psswd: String, streamName: String) {
         // There has to be a random/unique component to the SSID so that
         // nearby iPads don't interfere with one another.
-        let streamUrl = String(format:"rtmp://52.203.134.90/baller-publish/%@", streamName)
+        let streamUrl = String(format:"rtmp://52.207.170.50/baller-publish/%@", streamName)
         
         // Not sure yet if order matters or not. I don't see why it would,
         // but generating a similar string from a dictionary
@@ -45,7 +49,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
 //        """
         
         let raw = """
-        {"ssid":"\(ssid)", "pwd":"\(psswd)", "res":"480p", "rate":"0", "dur":"0", "url":"\(streamUrl)"}
+        {"ssid":"\(ssid)", "pwd":"\(psswd)", "res":"480p", "rate":"0", "dur":"0", "ak":"1", "url":"\(streamUrl)"}
         """
         
         NSLog(raw)
@@ -71,6 +75,37 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return nil
     }
     
+    @IBAction func WifiSourceUpdate(_ sender: Any) {
+        switch wifiSourceControl.selectedSegmentIndex {
+        case 0:
+            ssidTF.text = UIDevice.current.name
+            psswdTF.text = "baller123"
+        case 1:
+            ssidTF.text = "BallerTV_TEAM_WIFI"
+            psswdTF.text = "baller123"
+        default:
+            return
+        }
+        editingChanged(ssidTF)
+    }
+    
+    
+    
+    
+    @objc func editingChanged(_ textField: UITextField) {
+        guard
+            let ssid = ssidTF.text, !ssid.isEmpty,
+            let psswd = psswdTF.text, !psswd.isEmpty,
+            let streamName = streamNameTF.text, !streamName.isEmpty
+            else {
+                return
+        }
+        
+        showQRCode(from: ssid, psswd: psswd, streamName: streamName)
+    }
+    
+    
+    
     
     // Unfortunately, it seems like though it's possible to connect to an existing
     // network, it's impossible start a hotspot programmatically. We'll have to open
@@ -86,26 +121,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 print("success! what did we do?")
             }
         }
-    }
-    
-    @objc func editingChanged(_ textField: UITextField) {
-        guard
-            let ssid = ssidTF.text, !ssid.isEmpty,
-            let psswd = psswdTF.text, !psswd.isEmpty,
-            let streamName = streamNameTF.text, !streamName.isEmpty
-            else {
-                qrButton.isEnabled = false
-                return
-        }
-        qrButton.isEnabled = true
-    }
-    
-    @IBAction func qrButtonPressed(_ sender: Any) {
-        let ssid = String(ssidTF.text!)
-        let psswd = String(psswdTF.text!)
-        let streamName = String(streamNameTF.text!)
-        showQRCode(from: ssid, psswd: psswd, streamName: streamName)
-        
     }
 }
 
