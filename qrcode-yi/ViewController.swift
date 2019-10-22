@@ -48,9 +48,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
 //        {"ssid":"\(ssid)", "pwd":"\(psswd)", "res":"480p", "rate":"0", "dur":"0", "url":"\(streamUrl)", "ak":"0", "sign":"F5PDCUCmcE2OzrAP"}
 //        """
         
-        let raw = """
-        {"ssid":"\(ssid)", "pwd":"\(psswd)", "res":"480p", "rate":"0", "dur":"0", "ak":"1", "url":"\(streamUrl)"}
-        """
+//        let raw = """
+//        {"ssid":"\(ssid)", "pwd":"\(psswd)", "res":"480p", "rate":"0", "dur":"0", "ak":"1", "url":"\(streamUrl)", "ak":"0", "sign":"ayAtK5sK5BnxdO31"}
+//        """
+
+//        let raw = "SJ4\nBallerTV_TEAM_WIFI\nWestbrook#0\nrtmp://52.203.134.90/baller-publish/sjcam\n\(ssid)\n\(psswd)\n\(streamName)"
+        
+        let raw = "SJ4\n\(ssid)\n\(psswd)\n\(streamUrl)\n2\n0\n7"
         
         NSLog(raw)
         
